@@ -5,6 +5,7 @@
 #include "rapidjson/filereadstream.h"
 #include <fstream>
 
+
 using namespace std;
 //using namespace rapidjson;
 
@@ -73,14 +74,37 @@ rapidjson::Value& sortPassengersBySize(rapidjson::Value& array){
     return array;
 }
 
+static void copyDocument(rapidjson::Document & newDocument, rapidjson::Document & copiedDocument) {
+    rapidjson::StringBuffer strbuf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
+    newDocument.Accept(writer);
+    std::string str = strbuf.GetString();
+    copiedDocument.Parse<0>(str.c_str());
+}
+
+void writeDocument(rapidjson::Document doc){
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
+}
+
 int main() {
-    rapidjson::Document passengers_json = parseFile("passengers.json");//import passengers file
-    rapidjson::Value& passengers = passengers_json["passengers"];//get passengers array
+    rapidjson::Document passengers_doc = parseFile("passengers.json");//import passengers file
+    rapidjson::Value& passengers = passengers_doc["passengers"];//get passengers array
     assert(passengers.IsArray());
 
-    rapidjson::Value& passengers_sorted = sortPassengersBySize(passengers);cout << '\n';
+    rapidjson::Document passengers_sorted_doc;
+    copyDocument(passengers_doc, passengers_sorted_doc);
+    assert(passengers_sorted_doc.IsObject());
+    rapidjson::Value& passengers_sorted = passengers_sorted_doc["passengers"];
+    sortPassengersBySize(passengers_sorted);
 
-    
+
+    //rapidjson::StringBuffer buffer;
+    //rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
+
+
 
     return 0;
 }
