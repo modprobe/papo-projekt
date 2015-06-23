@@ -4,10 +4,24 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/filereadstream.h"
 #include <fstream>
+#include "utility"
+#include "map"
 
 
 using namespace std;
 //using namespace rapidjson;
+
+/**
+ * returns a rapidjson document representation of the given file name
+ */
+
+struct a320{
+    int max_seats = 180;
+    int max_buisness = 30;
+    int used_seats = 0;
+    int used_buisness = 0;
+};
+
 
 rapidjson::Document parseFile(string file) {
     rapidjson::Document d;
@@ -36,7 +50,10 @@ rapidjson::Document parseFile(string file) {
     }
 }
 
-
+/**
+ * returns size of a passengergroup as int
+ * 1 if single passenger
+ */
 int getPassengerGroupSize(rapidjson::Value& value){
     if(value.IsArray()){
         return value.Size();
@@ -47,11 +64,10 @@ int getPassengerGroupSize(rapidjson::Value& value){
 
 
 
-/** sortArray
+/**
+  * sortArray
   * sorts an Array by groupsize
-  *
   */
-
 rapidjson::Value& sortPassengersBySize(rapidjson::Value& array){
     assert(array.IsArray());
     int array_size = array.Size();
@@ -74,6 +90,9 @@ rapidjson::Value& sortPassengersBySize(rapidjson::Value& array){
     return array;
 }
 
+/**
+ * copies
+ */
 static void copyDocument(rapidjson::Document & newDocument, rapidjson::Document & copiedDocument) {
     rapidjson::StringBuffer strbuf;
     rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
@@ -88,23 +107,67 @@ void writeDocument(rapidjson::Document doc){
     doc.Accept(writer);
 }
 
+void writeFirstID(rapidjson::Value& value){
+    if(value.IsArray()){
+        cout << value[0]["ID"].GetInt();
+    }else{
+        cout << value["ID"].GetInt();
+    }
+}
+
+bool compareArraysByID(rapidjson::Document& first_doc, rapidjson::Document& second_doc){
+    rapidjson::Value& first = first_doc["passengers"];
+    rapidjson::Value& second= second_doc["passengers"];
+    if(first.Size()==second.Size()){
+        for (int i = 0; i < first.Size(); ++i) {
+            if(first[i].IsArray()){
+                if(second[i].IsArray()){
+                    for (int j = 0; j < first[i].Size(); ++j) {
+                        if(!(first[i][j]["ID"].GetInt()==second[i][j]["ID"])){
+                            return false;
+                        }
+                    }
+                }else{
+                    return false;
+                }
+            }else if(second[i].IsArray()){
+                return false;
+            }else if(!(first[i]["ID"].GetInt()==second[i]["ID"])){
+                return false;
+            }
+        }
+        return true;
+    }else{
+        return false;
+    }
+}
+
 int main() {
+    //Import
     rapidjson::Document passengers_doc = parseFile("passengers.json");//import passengers file
     rapidjson::Value& passengers = passengers_doc["passengers"];//get passengers array
-    assert(passengers.IsArray());
-
-    rapidjson::Document passengers_sorted_doc;
-    copyDocument(passengers_doc, passengers_sorted_doc);
-    assert(passengers_sorted_doc.IsObject());
+/*
+    rapidjson::Document passengers_sorted_doc = parseFile("passengers.json");
     rapidjson::Value& passengers_sorted = passengers_sorted_doc["passengers"];
+    cout << compareArraysByID(passengers_sorted_doc,passengers_doc) << '\n';
     sortPassengersBySize(passengers_sorted);
-
-
-    //rapidjson::StringBuffer buffer;
-    //rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-
-
-
+    cout << compareArraysByID(passengers_sorted_doc,passengers_doc) << '\n';
+*/
+    //split by destination
+    multimap<string,rapidjson::Value&> passengers_destination;
+    for (int i = 0; i < passengers.Size(); ++i) {
+        if(passengers[i].IsArray()){
+            string current_destination = passengers[i][0]["destination"].GetString();
+            rapidjson::Value& current_passenger = passengers[i];
+            passengers_destination.insert(std::pair<string,rapidjson::Value&>(current_destination, current_passenger));
+        }else{
+            string current_destination = passengers[i]["destination"].GetString();
+            rapidjson::Value& current_passenger = passengers[i];
+            passengers_destination.insert(std::pair<string,rapidjson::Value&>(current_destination, current_passenger));
+        }
+        //string dest =
+        map<string,rapidjson::Value> passengers_dest;
+    }
 
     return 0;
 }
