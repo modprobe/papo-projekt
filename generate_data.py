@@ -24,10 +24,8 @@ current_ID = 0
 # default 10
 if len(sys.argv) > 1:
     count = int(sys.argv[1])
-    planes = int(sys.argv[2])
 else:
     count = 10
-    planes = 1
 
 data = {}
 passengers = []
@@ -38,6 +36,7 @@ passengers = []
 def generate_passenger(group_size=1):
     dest = choice(destinations)
     class_rand = randint(0, 100)
+    time = choice(times)
     if class_rand < 60:
         seat_class = seat_classes[0]
     elif class_rand < 90:
@@ -45,17 +44,16 @@ def generate_passenger(group_size=1):
     else:
         seat_class = seat_classes[2]
     if group_size == 1:
-        return generate_passenger_group(seat_class, dest)
+        return generate_passenger_group(seat_class, dest, time)
     else:
         group = []
         for i in range(0, group_size):
-            group.append(generate_passenger_group(seat_class, dest))
+            group.append(generate_passenger_group(seat_class, dest, time))
         return group
 
 ## basically a helper, returns a passenger for a specified seat_class and destination
-def generate_passenger_group(seat_class, dest):
+def generate_passenger_group(seat_class, dest, time):
     global current_ID
-    time = choice(times)
     seat_pref = choice(seat_prefs)
     passenger = {'ID': current_ID, 'destination': dest, 'time': time, 'class': seat_class, 'seat_pref': seat_pref}
     current_ID = current_ID + 1
