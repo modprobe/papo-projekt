@@ -17,7 +17,7 @@ from random import choice
 destinations = ["Frankfurt", "London", "Paris", "New York"]
 seat_prefs = ["window", "middle", "aisle"]
 times = ["morning", "afternoon", "evening"]
-seat_classes = ["economy", "buisness", "first"]
+seat_classes = ["economy", "business", "first"]
 current_ID = 0
 
 # number of passengers to generate
