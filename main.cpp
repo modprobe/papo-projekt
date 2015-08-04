@@ -6,6 +6,7 @@
 #include <fstream>
 #include "utility"
 #include "map"
+#include "vector"
 
 
 using namespace std;
@@ -91,7 +92,7 @@ rapidjson::Value& sortPassengersBySize(rapidjson::Value& array){
 }
 
 /**
- * copies
+ * copies a Document
  */
 static void copyDocument(rapidjson::Document & newDocument, rapidjson::Document & copiedDocument) {
     rapidjson::StringBuffer strbuf;
@@ -101,6 +102,9 @@ static void copyDocument(rapidjson::Document & newDocument, rapidjson::Document 
     copiedDocument.Parse<0>(str.c_str());
 }
 
+/**
+ * writes a Document to StdOut
+ */
 void writeDocument(rapidjson::Document doc){
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -142,6 +146,28 @@ bool compareArraysByID(rapidjson::Document& first_doc, rapidjson::Document& seco
     }
 }
 
+/**
+ * returns a Multimap containing
+ */
+multimap<string,rapidjson::Value&>splitByDestination(rapidjson::Value& passengers){
+    multimap<string,rapidjson::Value&> passengers_destination;
+    for (int i = 0; i < passengers.Size(); ++i) {
+        if(passengers[i].IsArray()){
+            // group
+            rapidjson::Value& current_passenger = passengers[i];
+            string current_destination = current_passenger[0]["destination"].GetString();
+            passengers_destination.insert(std::pair<string,rapidjson::Value&>(current_destination, current_passenger));
+        }else{
+            // single passenger
+            string current_destination = passengers[i]["destination"].GetString();
+            rapidjson::Value& current_passenger = passengers[i];
+            passengers_destination.insert(std::pair<string,rapidjson::Value&>(current_destination, current_passenger));
+        }
+        map<string,rapidjson::Value> passengers_dest;
+    }
+    return passengers_destination;
+}
+
 int main() {
     //Import
     rapidjson::Document passengers_doc = parseFile("passengers.json");//import passengers file
@@ -155,19 +181,9 @@ int main() {
 */
     //split by destination
     multimap<string,rapidjson::Value&> passengers_destination;
-    for (int i = 0; i < passengers.Size(); ++i) {
-        if(passengers[i].IsArray()){
-            string current_destination = passengers[i][0]["destination"].GetString();
-            rapidjson::Value& current_passenger = passengers[i];
-            passengers_destination.insert(std::pair<string,rapidjson::Value&>(current_destination, current_passenger));
-        }else{
-            string current_destination = passengers[i]["destination"].GetString();
-            rapidjson::Value& current_passenger = passengers[i];
-            passengers_destination.insert(std::pair<string,rapidjson::Value&>(current_destination, current_passenger));
-        }
-        //string dest =
-        map<string,rapidjson::Value> passengers_dest;
-    }
+    passengers_destination = splitByDestination(passengers);
+    
+
 
     return 0;
 }
