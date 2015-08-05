@@ -21,6 +21,7 @@ struct a320{
     int max_buisness = 30;
     int used_seats = 0;
     int used_buisness = 0;
+    bool seats[6][31]
 };
 
 
@@ -182,7 +183,7 @@ int main() {
     //split by destination
     multimap<string,rapidjson::Value&> passengers_destination;
     passengers_destination = splitByDestination(passengers);
-    
+
 
 
     return 0;
